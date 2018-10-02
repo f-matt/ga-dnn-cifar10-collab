@@ -12,8 +12,8 @@ const int IMG_HEIGHT = 32;
 const int IMG_CHANNELS = 3;
 const int IMG_TYPE = CV_32FC3;
 
-Cifar10DataWrapper::Cifar10DataWrapper() : train_file("/home/fernando/data/cifar-10/training.bin"),
-		test_file("/home/fernando/data/cifar-10/test.bin"),
+Cifar10DataWrapper::Cifar10DataWrapper() : train_file("data/training.bin"),
+		test_file("data/test.bin"),
 		height(IMG_HEIGHT),
 		width(IMG_WIDTH),
 		channels(IMG_CHANNELS),

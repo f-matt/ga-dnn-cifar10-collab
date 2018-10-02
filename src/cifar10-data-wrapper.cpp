@@ -4,6 +4,8 @@
 #include <fstream>
 #include <iostream>
 
+using namespace std;
+
 const int IMG_WIDTH = 32;
 const int IMG_HEIGHT = 32;
 const int IMG_CHANNELS = 3;

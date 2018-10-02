@@ -1,0 +1,34 @@
+----------------
+Create sqlite db
+----------------
+
+$ sqlite3 db/ga-dnn.db --init db/db-sqlite.sql
+
+-------------------------
+Pre-requisites (Debian 9)
+-------------------------
+
+libgflags-dev
+libgoogle-glog-dev
+libprotobuf-dev
+libopenblas-dev
+libpqxx-dev
+libcurl4-gnutls-dev
+libjsoncpp-dev
+
+
+
+
+# Fix non deterministic behavior
+
+https://github.com/BVLC/caffe/issues/3055
+https://github.com/BVLC/caffe/issues/3109#issuecomment-146280655
+
+
+-----
+Boost
+-----
+
+* Run specific test case
+
+$ build/tests --run_test=classifier/cifar10_classifier_creation_test

@@ -101,6 +101,12 @@ void run_random_experiment() {
 
 	boost::shared_ptr<Cifar10DataWrapper> cifar10_data_wrapper(new Cifar10DataWrapper);
 
+	// Evaluate only the fifth new model to prevent simultaneous evaluation
+	int new_models = 0;
+
+	// Evaluate only 5 models to prevent long process shutdown
+	int evaluated_models = 0;
+
 	while (solutions.size() < 4000) {
 
 		Solution solution(cifar10_data_wrapper);
@@ -135,10 +141,20 @@ void run_random_experiment() {
 			solution.set_test_acc(train_test_acc.second);
 			solution.set_predicted(false);
 		} else {
-			solution.evaluate();
-			pattern.train_acc = solution.get_train_acc();
-			pattern.test_acc = solution.get_test_acc();
-			fitness_data_wrapper.append_pattern(pattern);
+			if (evaluated_models == 5) {
+				exit(0);
+			}
+
+			if (new_models == 5) {
+				solution.evaluate();
+				pattern.train_acc = solution.get_train_acc();
+				pattern.test_acc = solution.get_test_acc();
+				fitness_data_wrapper.append_pattern(pattern);
+				new_models = 0;
+				evaluated_models++;
+			} else {
+				new_models++;
+			}
 		}
 
 		cout << "Inserting solution " << solutions.size() + 1 << " " << solution.get_descriptor().to_string() << endl;
@@ -487,10 +503,10 @@ int main(int argc, char *argv[]) {
 	// debug_training("CR;8;9;2;2-CR;8;9;2;2-FR;8;0.2-FR;8;0.2");
 	// debug_training("FR;8;0.2-FR;8;0.2-FR;8;0.2");
 
-	// run_random_experiment();
+	run_random_experiment();
 	// run_grid_experiment();
 	// run_ga_experiment();
-	run_ga_pareto_experiment();
+	// run_ga_pareto_experiment();
 
 	// sync_rest_with_database();
 

@@ -14,6 +14,8 @@ using namespace std;
 const int POPULATION_SIZE = 200;
 const int N_GENERATIONS = 20;
 
+const int MAX_EVALUATIONS_SKIPPED = 7;
+
 struct training_result {
 	string topology;
 	long weights;
@@ -101,11 +103,7 @@ void run_random_experiment() {
 
 	boost::shared_ptr<Cifar10DataWrapper> cifar10_data_wrapper(new Cifar10DataWrapper);
 
-	// Evaluate only the fifth new model to prevent simultaneous evaluation
-	int new_models = 0;
-
-	// Evaluate only 5 models to prevent long process shutdown
-	int evaluated_models = 0;
+	int evaluations_skipped = 0;
 
 	while (solutions.size() < 4000) {
 
@@ -125,6 +123,20 @@ void run_random_experiment() {
 			continue;
 		}
 
+		cout << "Inserting solution " << solutions.size() + 1 << " " << solution.get_descriptor().to_string() << endl;
+
+		solutions.push_back(solution);
+	}
+
+	// Evaluate a meximum of 5 models for each run to prevent long running machine pause
+	int evaluated_models = 0;
+
+	for (Solution &solution : solutions) {
+
+		if (evaluated_models == 5) {
+			exit(0);
+		}
+
 		// Use predictor to estimate solution fitness
 		FitnessPattern pattern;
 		pattern.descriptor = solution.get_descriptor().to_string();
@@ -141,35 +153,20 @@ void run_random_experiment() {
 			solution.set_test_acc(train_test_acc.second);
 			solution.set_predicted(false);
 		} else {
-			if (evaluated_models == 5) {
-				exit(0);
-			}
-
-			if (new_models == 5) {
+			if (evaluations_skipped == MAX_EVALUATIONS_SKIPPED) {
+				evaluations_skipped = 0;
+				evaluated_models++;
+				cout << "Evaluating solution " << solution.get_descriptor().to_string() << endl;
 				solution.evaluate();
 				pattern.train_acc = solution.get_train_acc();
 				pattern.test_acc = solution.get_test_acc();
 				fitness_data_wrapper.append_pattern(pattern);
-				new_models = 0;
-				evaluated_models++;
 			} else {
-				new_models++;
+				evaluations_skipped++;
+				continue;
 			}
 		}
 
-		cout << "Inserting solution " << solutions.size() + 1 << " " << solution.get_descriptor().to_string() << endl;
-
-		solutions.push_back(solution);
-	}
-
-	// Update training log
-	for (size_t i = 0; i < solutions.size(); ++i) {
-		db_handler.save_random_log(
-				solutions[i].get_train_acc(),
-				solutions[i].get_test_acc(),
-				solutions[i].get_weights(),
-				solutions[i].is_predicted()
-		);
 	}
 
 }

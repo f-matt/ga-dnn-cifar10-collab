@@ -14,7 +14,7 @@ using namespace std;
 const int POPULATION_SIZE = 200;
 const int N_GENERATIONS = 20;
 
-const int MAX_EVALUATIONS_SKIPPED = 7;
+const int MAX_EVALUATIONS_SKIPPED = 19;
 
 struct training_result {
 	string topology;
@@ -329,7 +329,16 @@ void run_grid_experiment() {
 		}
 	}
 
+	int evaluations_skipped = 0;
+
+	// Evaluate a meximum of 5 models for each run to prevent long running machine pause
+	int evaluated_models = 0;
+
 	for (string descriptor : descriptors) {
+
+		if (evaluated_models == 5) {
+			exit(0);
+		}
 
 		TopologyDescriptor topology_descriptor(descriptor);
 	
@@ -356,10 +365,18 @@ void run_grid_experiment() {
 			solution.set_test_acc(train_test_acc.second);
 			solution.set_predicted(false);
 		} else {
-			solution.evaluate();
-			pattern.train_acc = solution.get_train_acc();
-			pattern.test_acc = solution.get_test_acc();
-			fitness_data_wrapper.append_pattern(pattern);
+			if (evaluations_skipped == MAX_EVALUATIONS_SKIPPED) {
+				evaluations_skipped = 0;
+				evaluated_models++;
+				cout << "Evaluating solution " << solution.get_descriptor().to_string() << endl;
+				solution.evaluate();
+				pattern.train_acc = solution.get_train_acc();
+				pattern.test_acc = solution.get_test_acc();
+				fitness_data_wrapper.append_pattern(pattern);
+			} else {
+				evaluations_skipped++;
+				continue;
+			}
 		}
 
 		cout << "Inserting solution " << solutions.size() + 1 << " " << solution.get_descriptor().to_string() << endl;
@@ -500,8 +517,8 @@ int main(int argc, char *argv[]) {
 	// debug_training("CR;8;9;2;2-CR;8;9;2;2-FR;8;0.2-FR;8;0.2");
 	// debug_training("FR;8;0.2-FR;8;0.2-FR;8;0.2");
 
-	run_random_experiment();
-	// run_grid_experiment();
+	// run_random_experiment();
+	run_grid_experiment();
 	// run_ga_experiment();
 	// run_ga_pareto_experiment();
 

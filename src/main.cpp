@@ -518,9 +518,9 @@ int main(int argc, char *argv[]) {
 	// debug_training("FR;8;0.2-FR;8;0.2-FR;8;0.2");
 
 	// run_random_experiment();
-	run_grid_experiment();
+	// run_grid_experiment();
 	// run_ga_experiment();
-	// run_ga_pareto_experiment();
+	run_ga_pareto_experiment();
 
 	// sync_rest_with_database();
 

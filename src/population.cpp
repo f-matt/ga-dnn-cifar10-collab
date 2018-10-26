@@ -111,13 +111,6 @@ void Population::evaluate_solution(Solution& solution) {
 			} else {
 				solution.evaluate();
 
-				// ### COLLAB BEGIN ###
-				if (++evaluated_solutions >= 5) {
-					cout << "Reached 5 evaluated solutions. Aborting." << endl;
-					exit(0);
-				}
-				// ### COLLAB END ###
-
 				pattern.train_acc = solution.get_train_acc();
 				pattern.test_acc = solution.get_test_acc();
 				fitness_data_wrapper.append_pattern(pattern);
@@ -128,10 +121,6 @@ void Population::evaluate_solution(Solution& solution) {
 			solution.set_predicted(true);
 		}
 
-		if (fitness_data_wrapper.has_new_data()) {
-				train_fitness_regressor();
-				fitness_data_wrapper.set_new_data(false);
-		}
 	} else {
 		pair<float, float> train_test_acc = fitness_data_wrapper.get_train_test_acc(solution.get_descriptor().to_string());
 
@@ -154,6 +143,11 @@ void Population::evaluate_solution(Solution& solution) {
 			pattern.test_acc = solution.get_test_acc();
 			fitness_data_wrapper.append_pattern(pattern);
 		}
+	}
+
+	if (fitness_data_wrapper.has_new_data()) {
+			train_fitness_regressor();
+			fitness_data_wrapper.set_new_data(false);
 	}
 
 }
